@@ -1,0 +1,123 @@
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'DEV_OPS', 'MARKETING_VENDAS_FINANCAS');
+CREATE TYPE "ProjectStatus" AS ENUM ('PLANEJADO', 'EM_ANDAMENTO', 'PAUSADO', 'CONCLUIDO');
+CREATE TYPE "TaskStatus" AS ENUM ('A_FAZER', 'EM_ANDAMENTO', 'CONCLUIDA');
+CREATE TYPE "LeadStatus" AS ENUM ('NOVO', 'CONTATO', 'NEGOCIACAO', 'GANHO', 'PERDIDO');
+CREATE TYPE "Priority" AS ENUM ('BAIXA', 'MEDIA', 'ALTA', 'URGENTE');
+
+CREATE TABLE "User" (
+  "id" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "email" TEXT NOT NULL,
+  "passwordHash" TEXT NOT NULL,
+  "role" "Role" NOT NULL,
+  "area" TEXT NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Project" (
+  "id" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "description" TEXT,
+  "status" "ProjectStatus" NOT NULL DEFAULT 'PLANEJADO',
+  "priority" "Priority" NOT NULL DEFAULT 'MEDIA',
+  "dueDate" TIMESTAMP(3),
+  "ownerId" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Task" (
+  "id" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "description" TEXT,
+  "status" "TaskStatus" NOT NULL DEFAULT 'A_FAZER',
+  "priority" "Priority" NOT NULL DEFAULT 'MEDIA',
+  "dueDate" TIMESTAMP(3),
+  "projectId" TEXT,
+  "assigneeId" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Client" (
+  "id" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "email" TEXT,
+  "phone" TEXT,
+  "company" TEXT,
+  "notes" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "Client_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Lead" (
+  "id" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "email" TEXT,
+  "company" TEXT,
+  "status" "LeadStatus" NOT NULL DEFAULT 'NOVO',
+  "value" DECIMAL(12,2) NOT NULL DEFAULT 0,
+  "clientId" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "Lead_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Sale" (
+  "id" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "value" DECIMAL(12,2) NOT NULL DEFAULT 0,
+  "clientId" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Sale_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Revenue" (
+  "id" TEXT NOT NULL,
+  "description" TEXT NOT NULL,
+  "value" DECIMAL(12,2) NOT NULL,
+  "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Revenue_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Expense" (
+  "id" TEXT NOT NULL,
+  "description" TEXT NOT NULL,
+  "value" DECIMAL(12,2) NOT NULL,
+  "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Expense_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "ActivityLog" (
+  "id" TEXT NOT NULL,
+  "action" TEXT NOT NULL,
+  "userId" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "ActivityLog_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "Message" (
+  "id" TEXT NOT NULL,
+  "content" TEXT NOT NULL,
+  "senderId" TEXT NOT NULL,
+  "read" BOOLEAN NOT NULL DEFAULT false,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+ALTER TABLE "Project" ADD CONSTRAINT "Project_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Task" ADD CONSTRAINT "Task_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Task" ADD CONSTRAINT "Task_assigneeId_fkey" FOREIGN KEY ("assigneeId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Lead" ADD CONSTRAINT "Lead_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Sale" ADD CONSTRAINT "Sale_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Message" ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

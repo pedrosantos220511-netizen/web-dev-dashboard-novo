@@ -1,0 +1,17 @@
+{
+  "name": "web-dev-dashboard",
+  "private": true,
+  "version": "2.0.0",
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run prisma:generate -w server && npm run build -w client && npm run build -w server",
+    "start": "npm run db:deploy -w server && npm run start -w server",
+    "db:generate": "npm run prisma:generate -w server",
+    "db:deploy": "npm run prisma:deploy -w server",
+    "db:seed": "npm run seed -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
