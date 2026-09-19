@@ -42,18 +42,19 @@ enum Priority {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  name         String
-  email        String        @unique
-  passwordHash String
-  role         Role
-  area         String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  projects     Project[]     @relation("ProjectOwner")
-  tasks        Task[]        @relation("TaskAssignee")
-  activities   ActivityLog[]
-  messages     Message[]     @relation("MessageSender")
+  id               String        @id @default(cuid())
+  name             String
+  email            String        @unique
+  passwordHash     String
+  role             Role
+  area             String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  projects         Project[]     @relation("ProjectOwner")
+  tasks            Task[]        @relation("TaskAssignee")
+  activities       ActivityLog[]
+  sentMessages     Message[]     @relation("MessageSender")
+  receivedMessages Message[]     @relation("MessageRecipient")
 }
 
 model Project {
@@ -145,10 +146,13 @@ model ActivityLog {
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String
-  senderId  String
-  sender    User     @relation("MessageSender", fields: [senderId], references: [id])
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  subject     String   @default("Sem assunto")
+  content     String
+  senderId    String
+  sender      User     @relation("MessageSender", fields: [senderId], references: [id])
+  recipientId String?
+  recipient   User?    @relation("MessageRecipient", fields: [recipientId], references: [id])
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }

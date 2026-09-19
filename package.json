@@ -5,9 +5,9 @@
   "workspaces": ["client", "server"],
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
-    "build": "npm run prisma:generate -w server && npm run build -w client && npm run build -w server",
-    "start": "npm run db:deploy -w server && npm run start -w server",
-    "db:generate": "npm run prisma:generate -w server",
+    "build": "node server/scripts/fix-prisma-windows.js && npm run prisma:generate -w server && npm run build -w client && npm run build -w server",
+    "start": "npm run start -w server",
+    "db:generate": "node server/scripts/fix-prisma-windows.js && npm run prisma:generate -w server",
     "db:deploy": "npm run prisma:deploy -w server",
     "db:seed": "npm run seed -w server"
   },
